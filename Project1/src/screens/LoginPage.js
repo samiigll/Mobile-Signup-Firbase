@@ -1,72 +1,68 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  Pressable,
-  Image,
-} from "react-native";
+import { StyleSheet, Text, View, Pressable, Image } from "react-native";
+
 import React, { useState } from "react";
-import Loading from "../components/Loading.js";
+import { Loading, CustomTextInput, CustomButton } from "../components/";
 
 const LoginPage = ({ navigation }) => {
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleLogin = () => {
+    setIsLoading(true);
+
+    // Simulate login request
+    setTimeout(() => {
+      setResult(email);
+      setIsLoading(false);
+    }, 2000);
+  };
+
   return (
     <View style={styles.container}>
+      <Text style={styles.welcome}>Welcome {result}</Text>
+
       <Image
         style={styles.image}
         source={require("../../assets/images/loginIcon.png")}
       />
 
-      <Text style={styles.welcome}>Welcome {result}</Text>
-      <Text>Email</Text>
-      <TextInput
-        inputMode="email"
-        placeholder="Enter your Email"
-        style={styles.textInputStyle}
-        onChangeText={setName}
-        value={name}
-      />
-      <Text>Password</Text>
-      <TextInput
-        inputMode="password"
-        secureTextEntry={true}
-        placeholder="Enter your Password"
-        style={styles.textInputStyle}
-        onChangeText={setLastName}
-        value={lastName}
+      <CustomTextInput
+        title="Email"
+        isSecureText={false}
+        handleOnChangeText={setEmail}
+        handleValue={email}
+        handlePlaceholder="Enter your Email"
       />
 
-      <Pressable
-        onPress={() => setIsLoading(true)}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed ? "gray" : "green",
-          },
-          styles.button,
-        ]}
-      >
-        <Text style={styles.buttonText}>Login</Text>
-      </Pressable>
+      <CustomTextInput
+        title="Password"
+        isSecureText={true}
+        handleOnChangeText={setPassword}
+        handleValue={password}
+        handlePlaceholder="Enter your Password"
+      />
 
-      <Pressable
-        onPress={() => navigation.navigate("SignUp")}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed ? "gray" : "#69DC9E",
-            marginTop: 10,
-          },
-          styles.signupButton,
-        ]}
-      >
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </Pressable>
+      <CustomButton
+        buttonText="Login"
+        setWidth="80%"
+        handleOnPress={() => setIsLoading(true)}
+        buttonColor="green"
+        pressedButtonColor="lightgray"
+      />
 
-      {isLoading && <Loading changeIsLoading={() => setIsLoading(false)} />}
+      <CustomButton
+        buttonText="Sign Up"
+        setWidth="30%"
+        handleOnPress={() => navigation.navigate("Signup")}
+        buttonColor="#69DC9E"
+        pressedButtonColor="lightgray"
+      />
+
+      {isLoading ? (
+        <Loading changeIsLoading={() => setIsLoading(false)} />
+      ) : null}
     </View>
   );
 };
@@ -80,26 +76,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  textInputStyle: {
-    borderWidth: 1,
+  inputContainer: {
     width: "80%",
-    height: 50,
-    borderRadius: 10,
-    marginVertical: 10,
-    textAlign: "center",
-    color: "black",
-    fontWeight: "bold",
-  },
-  button: {
-    width: "80%",
-    height: 50,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
   },
   image: {
     width: 100,
@@ -107,7 +85,7 @@ const styles = StyleSheet.create({
     marginVertical: 30,
   },
   welcome: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
     color: "green",
     marginVertical: 10,
