@@ -1,17 +1,17 @@
 import { StyleSheet, Text, View, Image } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Loading, CustomTextInput, CustomButton } from "../components/";
+import { login } from "../redux/userSlice";
+
 import { useSelector, useDispatch } from "react-redux";
-import {
-  setEmail,
-  setPassword,
-  setIsLoading,
-  setLogin,
-} from "../redux/userSlice";
+import { setIsLoading } from "../redux/userSlice";
 
 const LoginPage = ({ navigation }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   // userSlice içerisindeki verilerin okunması
-  const { email, password, isLoading } = useSelector((state) => state.user);
+  const { isLoading } = useSelector((state) => state.user);
 
   // userSlice içerisindeki redux yapılarına erişim
   const dispatch = useDispatch();
@@ -37,7 +37,7 @@ const LoginPage = ({ navigation }) => {
       <CustomTextInput
         title="Email"
         isSecureText={false}
-        handleOnChangeText={(newEmail) => dispatch(setEmail(newEmail))}
+        handleOnChangeText={(newEmail) => setEmail(newEmail)}
         handleValue={email}
         handlePlaceholder="Enter your Email"
       />
@@ -45,7 +45,7 @@ const LoginPage = ({ navigation }) => {
       <CustomTextInput
         title="Password"
         isSecureText={true}
-        handleOnChangeText={(newPassword) => dispatch(setPassword(newPassword))}
+        handleOnChangeText={(newPassword) => setPassword(newPassword)}
         handleValue={password}
         handlePlaceholder="Enter your Password"
       />
@@ -53,7 +53,7 @@ const LoginPage = ({ navigation }) => {
       <CustomButton
         buttonText="Login"
         setWidth="80%"
-        handleOnPress={() => dispatch(setLogin())}
+        handleOnPress={() => dispatch(login({ email, password }))}
         buttonColor="green"
         pressedButtonColor="lightgray"
       />
