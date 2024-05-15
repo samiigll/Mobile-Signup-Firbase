@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import React, { useState, useEffect } from "react";
 import {
   collection,
   addDoc,
@@ -13,14 +13,23 @@ import { CustomButton } from "../components";
 
 const HomePage = () => {
   const [data, setData] = useState([]);
-  console.log("data: ", data);
-  // Function to send data to Firestore
+  const [isSaved, setIsSave] = useState(false);
+  const [updateTheData, setUpdateTheData] = useState("");
+
+  console.log(isSaved);
+  console.log("data", data);
+
+  useEffect(() => {
+    getData();
+  }, [isSaved]);
+
+  // SEND DATA OF FIREBASE
   const sendData = async () => {
     try {
       const docRef = await addDoc(collection(db, "reactNativeLesson"), {
-        title: "Zero to Hero in React Native",
+        title: "Zero to Hero",
         lesson: 99,
-        content: "This is a lesson on how to use Firestore with React Native",
+        content: "React Native tutorial for beginner.",
       });
       console.log("Document written with ID: ", docRef.id);
     } catch (e) {
@@ -28,45 +37,87 @@ const HomePage = () => {
     }
   };
 
-  // Function to get data from Firestore
+  // GET DATA FROM FIRBASE
   const getData = async () => {
-    const querySnapshot = await getDocs(collection(db, "reactNativeLesson"));
-    querySnapshot.forEach((doc) => {
-      // console.log(`${doc.id} => ${doc.data()}`);
-      setData([...data, doc.data()]);
-    });
-  };
+    const allData = [];
 
-  // Function to delete data from Firestore
-  const deleteData = async () => {
-    await deleteDoc(doc(db, "reactNativeLesson", "0OlinxrjDLJ0fJboHjnJ"));
-  };
-
-  // Function to update data in Firestore
-  const updateData = async () => {
     try {
-      const lessonData = doc(db, "reactNativeLesson", "pPa7IvXW4CX8T0deaEk2");
-      await updateDoc(lessonData, {
-        lesson: 100,
+      const querySnapshot = await getDocs(collection(db, "reactNativeLesson"));
+      querySnapshot.forEach((doc) => {
+        allData.push({ ...doc.data(), id: doc.id });
       });
+      setData(allData);
     } catch (e) {
-      console.error("Error updating document: ", e);
+      console.error("Error getting documents: ", e);
+    }
+  };
+
+  // DELETE DATA FROM FIREBASE
+  const deleteData = async (value) => {
+    try {
+      await deleteDoc(doc(db, "reactNativeLesson", value));
+      console.log("Delete succesfull");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // UPDATE DATA FROM FIREBASE
+  const updateData = async (value) => {
+    try {
+      const lessonData = doc(db, "reactNativeLesson", value);
+      await updateDoc(lessonData, {
+        content: updateTheData,
+      });
+    } catch (error) {
+      console.error;
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text>{data.title}</Text>
-      <Text>{data.content}</Text>
-      <Text>{data.lesson}</Text>
+      <TextInput
+        value={updateTheData}
+        onChangeText={setUpdateTheData}
+        placeholder="enter your data"
+        style={{
+          width: "80%",
+          height: 40,
+          borderColor: "gray",
+          borderWidth: 1,
+          textAlign: "center",
+        }}
+      />
+
+      {data.map((value, index) => {
+        return (
+          <Pressable
+            onPress={() => [
+              updateData(value.id),
+              setIsSave(isSaved === false ? true : false),
+            ]}
+            key={index}
+          >
+            <Text>{index + 1}</Text>
+            <Text>{value.id}</Text>
+            <Text>{value.title}</Text>
+            <Text>{value.lesson}</Text>
+            <Text>{value.content}</Text>
+          </Pressable>
+        );
+      })}
 
       <CustomButton
         buttonText={"Save"}
         setWidth={"40%"}
         buttonColor={"#69DC9E"}
         pressedButtonColor={"gray"}
-        handleOnPress={sendData}
+        handleOnPress={() => {
+          sendData();
+          setIsSave(isSave === false ? true : false);
+        }}
       />
+
       <CustomButton
         buttonText={"Get Data"}
         setWidth={"40%"}
