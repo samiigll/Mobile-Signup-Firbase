@@ -9,6 +9,7 @@ This project is a mobile application that includes features such as user registr
 - Storing user data
 - Modifying user data
 - Deleting user data
+![image](https://github.com/samiigll/Mobile-Signup-Firbase/assets/148059353/ce69e23a-5b59-4c7c-9744-660d880b63c9)
 
 ## Technologies Used
 
