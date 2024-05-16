@@ -1,4 +1,4 @@
-# React Native Firebase Authentication App
+# React Native Authentication App - Firebase
 
 This project is a mobile application that includes features such as user registration, login, data storage, data modification, and data deletion using React Native, Expo, and Google Firebase.
 
