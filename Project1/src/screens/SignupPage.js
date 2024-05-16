@@ -1,3 +1,7 @@
+import React, { useState } from "react";
+import { CustomTextInput, CustomButton } from "../components";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "../redux/userSlice";
 import {
   StyleSheet,
   Text,
@@ -6,13 +10,21 @@ import {
   Image,
   Pressable,
 } from "react-native";
-import React, { useState } from "react";
-import { CustomTextInput, CustomButton } from "../components";
 
 const SignupPage = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const dispatch = useDispatch();
+  const { isLoading } = useSelector((state) => state.user);
+  const handelRegister = () => {
+    dispatch(register({ name, email, password }));
+  };
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -56,7 +68,7 @@ const SignupPage = ({ navigation }) => {
           setWidth={"80%"}
           buttonColor={"green"}
           pressedButtonColor={"lightgray"}
-          handleOnPress={() => console.log(name, " ", email, " ", password)}
+          handleOnPress={handelRegister}
         />
 
         <Pressable onPress={() => navigation.navigate("Login")}>

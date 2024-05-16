@@ -1,4 +1,3 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import {
   collection,
@@ -10,20 +9,22 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { CustomButton } from "../components";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/userSlice";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 const HomePage = () => {
   const [data, setData] = useState([]);
-  const [isSaved, setIsSave] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [updateTheData, setUpdateTheData] = useState("");
+  const [selectedId, setSelectedId] = useState(null); // Yeni state
 
-  console.log(isSaved);
-  console.log("data", data);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     getData();
   }, [isSaved]);
 
-  // SEND DATA OF FIREBASE
   const sendData = async () => {
     try {
       const docRef = await addDoc(collection(db, "reactNativeLesson"), {
@@ -32,15 +33,14 @@ const HomePage = () => {
         content: "React Native tutorial for beginner.",
       });
       console.log("Document written with ID: ", docRef.id);
+      setIsSaved(!isSaved);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
   };
 
-  // GET DATA FROM FIRBASE
   const getData = async () => {
     const allData = [];
-
     try {
       const querySnapshot = await getDocs(collection(db, "reactNativeLesson"));
       querySnapshot.forEach((doc) => {
@@ -52,26 +52,32 @@ const HomePage = () => {
     }
   };
 
-  // DELETE DATA FROM FIREBASE
-  const deleteData = async (value) => {
+  const deleteData = async (id) => {
     try {
-      await deleteDoc(doc(db, "reactNativeLesson", value));
-      console.log("Delete succesfull");
+      await deleteDoc(doc(db, "reactNativeLesson", id));
+      console.log("Delete successful");
+      setSelectedId(null); // Seçili ID'yi temizle
+      setIsSaved(!isSaved);
     } catch (error) {
-      console.log(error);
+      console.error("Error deleting document: ", error);
     }
   };
 
-  // UPDATE DATA FROM FIREBASE
-  const updateData = async (value) => {
+  const updateData = async (id) => {
     try {
-      const lessonData = doc(db, "reactNativeLesson", value);
+      const lessonData = doc(db, "reactNativeLesson", id);
       await updateDoc(lessonData, {
         content: updateTheData,
       });
+      console.log("Update successful");
+      setIsSaved(!isSaved);
     } catch (error) {
-      console.error;
+      console.error("Error updating document: ", error);
     }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
   };
 
   return (
@@ -89,33 +95,28 @@ const HomePage = () => {
         }}
       />
 
-      {data.map((value, index) => {
-        return (
-          <Pressable
-            onPress={() => [
-              updateData(value.id),
-              setIsSave(isSaved === false ? true : false),
-            ]}
-            key={index}
-          >
-            <Text>{index + 1}</Text>
-            <Text>{value.id}</Text>
-            <Text>{value.title}</Text>
-            <Text>{value.lesson}</Text>
-            <Text>{value.content}</Text>
-          </Pressable>
-        );
-      })}
+      {data.map((value, index) => (
+        <Pressable
+          onPress={() => setSelectedId(value.id)} // ID'yi seçmek için
+          key={index}
+        >
+          <Text>{index + 1}</Text>
+          <Text>{value.id}</Text>
+          <Text>{value.title}</Text>
+          <Text>{value.lesson}</Text>
+          <Text>{value.content}</Text>
+          {selectedId === value.id ? (
+            <Text style={{ color: "blue" }}>Selected</Text>
+          ) : null}
+        </Pressable>
+      ))}
 
       <CustomButton
         buttonText={"Save"}
         setWidth={"40%"}
         buttonColor={"#69DC9E"}
         pressedButtonColor={"gray"}
-        handleOnPress={() => {
-          sendData();
-          setIsSave(isSave === false ? true : false);
-        }}
+        handleOnPress={sendData}
       />
 
       <CustomButton
@@ -125,19 +126,41 @@ const HomePage = () => {
         pressedButtonColor={"gray"}
         handleOnPress={getData}
       />
+
       <CustomButton
         buttonText={"Delete Data"}
         setWidth={"40%"}
         buttonColor={"#69DC9E"}
         pressedButtonColor={"gray"}
-        handleOnPress={deleteData}
+        handleOnPress={() => {
+          if (selectedId) {
+            deleteData(selectedId);
+          } else {
+            console.log("No ID selected");
+          }
+        }}
       />
+
       <CustomButton
         buttonText={"Update Data"}
         setWidth={"40%"}
         buttonColor={"#69DC9E"}
         pressedButtonColor={"gray"}
-        handleOnPress={updateData}
+        handleOnPress={() => {
+          if (selectedId) {
+            updateData(selectedId);
+          } else {
+            console.log("No ID selected");
+          }
+        }}
+      />
+
+      <CustomButton
+        buttonText={"LOGOUT"}
+        setWidth={"40%"}
+        buttonColor={"red"}
+        pressedButtonColor={"gray"}
+        handleOnPress={handleLogout}
       />
     </View>
   );
@@ -148,7 +171,6 @@ export default HomePage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#fff",

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Image } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Loading, CustomTextInput, CustomButton } from "../components/";
-import { login } from "../redux/userSlice";
+import { login, autoLogin } from "../redux/userSlice";
 
 import { useSelector, useDispatch } from "react-redux";
 import { setIsLoading } from "../redux/userSlice";
@@ -16,14 +16,15 @@ const LoginPage = ({ navigation }) => {
   // userSlice içerisindeki redux yapılarına erişim
   const dispatch = useDispatch();
 
-  const handleLogin = () => {
-    dispatch(setIsLoading(true));
+  // Kullanıcı daha önce giriş yapmış mı kontrolü ve otomatik giriş işlemleri
+  useEffect(() => {
+    dispatch(autoLogin());
 
     // Simulate login request
     setTimeout(() => {
       dispatch(setIsLoading(false));
     }, 2000);
-  };
+  }, [dispatch]);
 
   return (
     <View style={styles.container}>
